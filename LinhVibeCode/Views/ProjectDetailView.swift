@@ -102,7 +102,7 @@ private struct AssignedMemberRowView: View {
                     .frame(width: 36, height: 36)
                 Text(String(assigned.member.name.prefix(1)))
                     .font(.subheadline.weight(.bold))
-                    .foregroundStyle(.accent)
+                    .foregroundColor(.accentColor)
             }
 
             VStack(alignment: .leading, spacing: 2) {
