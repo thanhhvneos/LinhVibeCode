@@ -95,13 +95,15 @@ struct AssignedMember: Identifiable, Codable {
     let role: Skill
     let allocation: Double  // 0.0 → 1.0
     let score: Double       // matching score
+    let reason: String      // human-readable explanation of why this member was selected
 
-    init(id: UUID = UUID(), member: Member, role: Skill, allocation: Double, score: Double) {
+    init(id: UUID = UUID(), member: Member, role: Skill, allocation: Double, score: Double, reason: String = "") {
         self.id = id
         self.member = member
         self.role = role
         self.allocation = allocation
         self.score = score
+        self.reason = reason
     }
 }
 
