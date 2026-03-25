@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SimulationView: View {
     @EnvironmentObject var store: AppDataStore
+    @Environment(\.dismiss) private var dismiss
     let project: Project
 
     // ── Local simulation state
@@ -19,6 +20,8 @@ struct SimulationView: View {
 
             if let sim = simResult, let base = baseline {
                 diffSection(sim: sim, base: base)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                applySection(sim: sim)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
@@ -200,6 +203,24 @@ struct SimulationView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func applySection(sim: AllocationResult) -> some View {
+        Section {
+            Button {
+                store.applySimulation(sim)
+                dismiss()
+            } label: {
+                HStack {
+                    Spacer()
+                    Label("Apply to Project", systemImage: "checkmark.seal.fill")
+                        .font(.headline)
+                    Spacer()
+                }
+            }
+            .foregroundColor(.white)
+            .listRowBackground(Color.green)
         }
     }
 

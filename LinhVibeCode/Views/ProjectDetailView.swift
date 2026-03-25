@@ -30,9 +30,20 @@ struct ProjectDetailView: View {
             // ── 3. Assigned team
             if let result, !result.assignedMembers.isEmpty {
                 let bestID = result.assignedMembers.max(by: { $0.score < $1.score })?.id
-                Section("Assigned Team") {
+                let pinned = store.isPinned(for: project)
+                Section {
                     ForEach(result.assignedMembers) { assigned in
                         AssignedMemberRowView(assigned: assigned, isBest: assigned.id == bestID)
+                    }
+                } header: {
+                    HStack {
+                        Text("Assigned Team")
+                        if pinned {
+                            Spacer()
+                            Label("Pinned", systemImage: "pin.fill")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.orange)
+                        }
                     }
                 }
             }
@@ -81,6 +92,16 @@ struct ProjectDetailView: View {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Edit") { showEditSheet = true }
+            }
+            if store.isPinned(for: project) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(role: .destructive) {
+                        store.resetToAuto(for: project.id)
+                    } label: {
+                        Label("Reset to Auto", systemImage: "arrow.counterclockwise")
+                            .font(.subheadline)
+                    }
+                }
             }
         }
         .sheet(isPresented: $showEditSheet) {

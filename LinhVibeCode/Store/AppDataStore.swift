@@ -14,6 +14,9 @@ final class AppDataStore: ObservableObject {
     /// Pre-computed allocation results for all projects.
     @Published private(set) var results: [AllocationResult] = []
 
+    /// Results manually committed from Simulation. Take priority over auto-computed.
+    @Published private var pinnedResults: [UUID: AllocationResult] = [:]
+
     init() {
         recomputeResults()
     }
@@ -25,7 +28,12 @@ final class AppDataStore: ObservableObject {
     }
 
     func result(for project: Project) -> AllocationResult? {
-        results.first { $0.project.id == project.id }
+        if let pinned = pinnedResults[project.id] { return pinned }
+        return results.first { $0.project.id == project.id }
+    }
+
+    func isPinned(for project: Project) -> Bool {
+        pinnedResults[project.id] != nil
     }
 
     func status(for project: Project) -> ProjectStatus {
@@ -90,5 +98,17 @@ final class AppDataStore: ObservableObject {
             requiredRoles: adjustedRoles
         )
         return engine.allocate(project: simulatedProject, members: filteredMembers)
+    }
+
+    // MARK: - Pin / Reset
+
+    /// Commit a simulation result as the displayed team for its project.
+    func applySimulation(_ result: AllocationResult) {
+        pinnedResults[result.project.id] = result
+    }
+
+    /// Discard the pinned result and revert to the auto-computed allocation.
+    func resetToAuto(for projectID: UUID) {
+        pinnedResults.removeValue(forKey: projectID)
     }
 }
