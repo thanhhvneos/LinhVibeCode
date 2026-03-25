@@ -69,6 +69,15 @@ struct ProjectDetailView: View {
         }
         .navigationTitle(project.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    SimulationView(project: project)
+                } label: {
+                    Label("Simulate", systemImage: "slider.horizontal.3")
+                }
+            }
+        }
     }
 
     // MARK: - Overview section
