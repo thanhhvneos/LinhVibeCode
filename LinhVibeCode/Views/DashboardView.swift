@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var store: AppDataStore
     @State private var appeared = false
+    @State private var showAddSheet = false
 
     var body: some View {
         NavigationStack {
@@ -20,12 +21,25 @@ struct DashboardView: View {
                         value: appeared
                     )
                 }
+                .onDelete { offsets in
+                    withAnimation { store.deleteProjectsAtOffsets(offsets) }
+                }
             }
             .navigationTitle("Projects")
-            .onAppear {
-                if !appeared {
-                    appeared = true
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { EditButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showAddSheet = true } label: {
+                        Image(systemName: "plus")
+                    }
                 }
+            }
+            .onAppear {
+                if !appeared { appeared = true }
+            }
+            .sheet(isPresented: $showAddSheet) {
+                ProjectFormView(mode: .add)
+                    .environmentObject(store)
             }
         }
     }

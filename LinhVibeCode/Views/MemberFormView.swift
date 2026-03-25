@@ -39,7 +39,7 @@ struct MemberFormView: View {
         Section("Basic Info") {
             TextField("Full name", text: $vm.name)
             if let error = vm.nameError {
-                fieldError(error)
+                FieldErrorLabel(message: error)
             }
 
             Picker("Level", selection: $vm.level) {
@@ -57,7 +57,7 @@ struct MemberFormView: View {
                     .frame(width: 100)
             }
             if let error = vm.costError {
-                fieldError(error)
+                FieldErrorLabel(message: error)
             }
 
             HStack {
@@ -69,14 +69,14 @@ struct MemberFormView: View {
                     .frame(width: 100)
             }
             if let error = vm.allocationError {
-                fieldError(error)
+                FieldErrorLabel(message: error)
             }
         }
     }
 
     private var skillsSection: some View {
         Section("Skills") {
-            ForEach(Skill.all) { skill in
+            ForEach(vm.availableSkills) { skill in
                 Toggle(skill.name, isOn: Binding(
                     get: { vm.selectedSkillIDs.contains(skill.id) },
                     set: { vm.toggleSkill(skill.id, on: $0) }
@@ -89,7 +89,7 @@ struct MemberFormView: View {
     private var preferredSkillsSection: some View {
         if !vm.selectedSkillIDs.isEmpty {
             Section("Preferred Skills") {
-                ForEach(Skill.all.filter { vm.selectedSkillIDs.contains($0.id) }) { skill in
+                ForEach(vm.availableSkills.filter { vm.selectedSkillIDs.contains($0.id) }) { skill in
                     Toggle(skill.name, isOn: Binding(
                         get: { vm.preferenceSkillIDs.contains(skill.id) },
                         set: { vm.togglePreference(skill.id, on: $0) }
@@ -99,18 +99,15 @@ struct MemberFormView: View {
         }
     }
 
-    private func fieldError(_ message: String) -> some View {
-        Text(message)
-            .font(.caption)
-            .foregroundColor(.red)
-    }
-
     // MARK: - Action
 
     private func save() {
-        if vm.save(to: store) {
-            dismiss()
+        guard let member = vm.build() else { return }
+        switch vm.mode {
+        case .add:  store.addMember(member)
+        case .edit: store.updateMember(member)
         }
+        dismiss()
     }
 }
 

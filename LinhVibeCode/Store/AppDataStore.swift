@@ -51,6 +51,21 @@ final class AppDataStore: ObservableObject {
         members.remove(atOffsets: offsets)
     }
 
+    // MARK: - Project CRUD
+
+    func addProject(_ project: Project) {
+        projects.append(project)
+    }
+
+    func updateProject(_ updated: Project) {
+        guard let idx = projects.firstIndex(where: { $0.id == updated.id }) else { return }
+        projects[idx] = updated
+    }
+
+    func deleteProjectsAtOffsets(_ offsets: IndexSet) {
+        projects.remove(atOffsets: offsets)
+    }
+
     // MARK: - Simulation
 
     /// Run a what-if simulation without touching stored results.

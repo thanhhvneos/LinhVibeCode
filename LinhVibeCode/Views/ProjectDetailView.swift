@@ -3,6 +3,7 @@ import SwiftUI
 struct ProjectDetailView: View {
     @EnvironmentObject var store: AppDataStore
     let project: Project
+    @State private var showEditSheet = false
 
     private var result: AllocationResult? { store.result(for: project) }
 
@@ -78,6 +79,13 @@ struct ProjectDetailView: View {
                     Label("Simulate", systemImage: "slider.horizontal.3")
                 }
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Edit") { showEditSheet = true }
+            }
+        }
+        .sheet(isPresented: $showEditSheet) {
+            ProjectFormView(mode: .edit(project))
+                .environmentObject(store)
         }
     }
 
