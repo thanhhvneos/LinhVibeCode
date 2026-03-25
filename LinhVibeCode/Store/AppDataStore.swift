@@ -2,15 +2,25 @@ import Foundation
 import Combine
 
 final class AppDataStore: ObservableObject {
-    @Published var members: [Member] = Member.mockMembers
-    @Published var projects: [Project] = Project.mockProjects
+    @Published var members: [Member] = Member.mockMembers {
+        didSet { recomputeResults() }
+    }
+    @Published var projects: [Project] = Project.mockProjects {
+        didSet { recomputeResults() }
+    }
 
     private let engine = AllocationEngine()
 
     /// Pre-computed allocation results for all projects.
-    private(set) var results: [AllocationResult] = []
+    @Published private(set) var results: [AllocationResult] = []
 
     init() {
+        recomputeResults()
+    }
+
+    // MARK: - Results
+
+    private func recomputeResults() {
         results = projects.map { engine.allocate(project: $0, members: members) }
     }
 
@@ -22,11 +32,28 @@ final class AppDataStore: ObservableObject {
         result(for: project)?.status ?? .ok
     }
 
+    // MARK: - Member CRUD
+
+    func addMember(_ member: Member) {
+        members.append(member)
+    }
+
+    func updateMember(_ updated: Member) {
+        guard let idx = members.firstIndex(where: { $0.id == updated.id }) else { return }
+        members[idx] = updated
+    }
+
+    func deleteMember(id: UUID) {
+        members.removeAll { $0.id == id }
+    }
+
+    func deleteMembersAtOffsets(_ offsets: IndexSet) {
+        members.remove(atOffsets: offsets)
+    }
+
+    // MARK: - Simulation
+
     /// Run a what-if simulation without touching stored results.
-    /// - Parameters:
-    ///   - project: The project to simulate.
-    ///   - excludedMemberIDs: Members toggled off by the user.
-    ///   - roleOverrides: quantity overrides keyed by RequiredRole.id.
     func simulate(
         project: Project,
         excludedMemberIDs: Set<UUID>,

@@ -29,3 +29,18 @@
 🔹 Phase 6: Polish
  Animation
  Highlight best member
+
+🔹 Phase 7: Member Management
+ Dashboard sẽ có 2 tab: Projects & Members
+ Members:
+    Hiển thị list member
+    Thêm member
+    Sửa member
+    Xóa member
+
+🔹 Phase 8: Project Management
+ Projects tab:
+    Hiển thị list member
+    Thêm project
+    Sửa project
+    Xóa project

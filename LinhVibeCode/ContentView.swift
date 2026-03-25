@@ -11,8 +11,14 @@ struct ContentView: View {
     @StateObject private var store = AppDataStore()
 
     var body: some View {
-        DashboardView()
-            .environmentObject(store)
+        TabView {
+            DashboardView()
+                .tabItem { Label("Projects", systemImage: "folder.fill") }
+
+            MemberListView()
+                .tabItem { Label("Members", systemImage: "person.2.fill") }
+        }
+        .environmentObject(store)  // single injection point for the whole app
     }
 }
 
