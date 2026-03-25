@@ -19,6 +19,7 @@ struct SimulationView: View {
 
             if let sim = simResult, let base = baseline {
                 diffSection(sim: sim, base: base)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .navigationTitle("Simulation")
@@ -111,11 +112,13 @@ struct SimulationView: View {
     private var recalculateButton: some View {
         Section {
             Button {
-                simResult = store.simulate(
-                    project: project,
-                    excludedMemberIDs: excludedMemberIDs,
-                    roleOverrides: roleOverrides
-                )
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                    simResult = store.simulate(
+                        project: project,
+                        excludedMemberIDs: excludedMemberIDs,
+                        roleOverrides: roleOverrides
+                    )
+                }
             } label: {
                 HStack {
                     Spacer()

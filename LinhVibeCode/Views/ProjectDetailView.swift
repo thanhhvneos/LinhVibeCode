@@ -28,9 +28,10 @@ struct ProjectDetailView: View {
 
             // ── 3. Assigned team
             if let result, !result.assignedMembers.isEmpty {
+                let bestID = result.assignedMembers.max(by: { $0.score < $1.score })?.id
                 Section("Assigned Team") {
                     ForEach(result.assignedMembers) { assigned in
-                        AssignedMemberRowView(assigned: assigned)
+                        AssignedMemberRowView(assigned: assigned, isBest: assigned.id == bestID)
                     }
                 }
             }
@@ -101,17 +102,29 @@ struct ProjectDetailView: View {
 
 private struct AssignedMemberRowView: View {
     let assigned: AssignedMember
+    let isBest: Bool
 
     var body: some View {
         HStack(spacing: 12) {
-            // Avatar circle
-            ZStack {
+            // Avatar circle — gold ring + crown for best member
+            ZStack(alignment: .topTrailing) {
                 Circle()
-                    .fill(Color.accentColor.opacity(0.15))
+                    .fill(isBest ? Color.yellow.opacity(0.2) : Color.accentColor.opacity(0.15))
                     .frame(width: 36, height: 36)
+                    .overlay(
+                        Circle()
+                            .strokeBorder(isBest ? Color.yellow : Color.clear, lineWidth: 2)
+                    )
                 Text(String(assigned.member.name.prefix(1)))
                     .font(.subheadline.weight(.bold))
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(isBest ? .orange : .accentColor)
+                    .frame(width: 36, height: 36)
+                if isBest {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 9))
+                        .foregroundColor(.yellow)
+                        .offset(x: 4, y: -4)
+                }
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -140,6 +153,7 @@ private struct AssignedMemberRowView: View {
 
 private struct ScoreGaugeView: View {
     let score: Double  // 0…1
+    @State private var animatedScore: Double = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -147,21 +161,28 @@ private struct ScoreGaugeView: View {
                 Text("Match Score")
                     .font(.subheadline)
                 Spacer()
-                Text(String(format: "%.0f / 100", score * 100))
+                Text(String(format: "%.0f / 100", animatedScore * 100))
                     .font(.subheadline.monospacedDigit().weight(.semibold))
                     .foregroundStyle(scoreColor)
+                    .contentTransition(.numericText())
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(Color.secondary.opacity(0.15))
                         .frame(height: 8)
                     Capsule().fill(scoreColor)
-                        .frame(width: geo.size.width * min(score, 1), height: 8)
+                        .frame(width: geo.size.width * min(animatedScore, 1), height: 8)
+                        .animation(.easeOut(duration: 0.8), value: animatedScore)
                 }
             }
             .frame(height: 8)
         }
         .padding(.vertical, 4)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                animatedScore = score
+            }
+        }
     }
 
     private var scoreColor: Color {
